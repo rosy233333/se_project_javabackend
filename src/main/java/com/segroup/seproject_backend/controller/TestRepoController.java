@@ -1,4 +1,4 @@
-package com.segroup.seproject_backend;
+package com.segroup.seproject_backend.controller;
 
 import com.segroup.seproject_backend.repository.ProjectRepo;
 import org.springframework.beans.factory.annotation.Autowired;
