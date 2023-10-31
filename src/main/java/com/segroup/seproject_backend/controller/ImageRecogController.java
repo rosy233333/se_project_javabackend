@@ -1,5 +1,6 @@
 package com.segroup.seproject_backend.controller;
 
+import com.segroup.seproject_backend.repository.ProjectRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
@@ -20,8 +21,13 @@ import static org.apache.commons.io.FileUtils.readFileToString;
 @Controller
 public class ImageRecogController {
 
+    //用于获取配置文件
     @Autowired
     private Environment environment;
+
+    //数据库
+    @Autowired
+    private ProjectRepo projectRepo;
 
 
     private byte byteBuffer[];
@@ -41,7 +47,10 @@ public class ImageRecogController {
         fileUploadItem.getFile().transferTo(file);
         System.out.println("成功接收到文件，保存在" + filePathName);
 
-        //传给python模型
+        // 保存使用记录
+        projectRepo.recordOneUse(date, 0); // 之后要修改，获取模型id
+
+        // 传给python模型
         String predictScriptPathname = environment.getProperty("my-config.global.pyscript-path") + "predict.py";
         String modelPathname = environment.getProperty("my-config.global.model-path");
         ArrayList<String> command = new ArrayList(Arrays.asList("python", predictScriptPathname, "--image", filePathName, "--model", modelPathname));
@@ -52,7 +61,7 @@ public class ImageRecogController {
         process.waitFor();
         System.out.println("----------------预测完成----------------");
 
-        //接收结果并返回
+        // 接收结果并返回
         String resultImagePathName = filePathName + "_pred";
         String resultTextPathName = "D:\\test_file_recv\\1698677748104.png_pred.txt"; //明天修改了脚本之后再改
         PredictResultItem predictResultItem = new PredictResultItem();
