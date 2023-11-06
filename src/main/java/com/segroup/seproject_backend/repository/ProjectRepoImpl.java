@@ -1,8 +1,8 @@
 package com.segroup.seproject_backend.repository;
 
+import com.segroup.seproject_backend.data_item.UsageItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import org.springframework.stereotype.Repository;

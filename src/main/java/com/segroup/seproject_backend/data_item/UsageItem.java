@@ -1,4 +1,4 @@
-package com.segroup.seproject_backend.repository;
+package com.segroup.seproject_backend.data_item;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,10 +1,10 @@
-package com.segroup.seproject_backend.controller;
+package com.segroup.seproject_backend.data_item;
 
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 @Data
-public class FileUploadItem {
+public class ImageRecogF2JItem {
     private MultipartFile file;
     private String postfix;
 }
