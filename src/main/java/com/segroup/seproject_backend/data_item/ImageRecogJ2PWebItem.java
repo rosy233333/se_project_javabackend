@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ImageRecogJ2PItem {
+public class ImageRecogJ2PWebItem {
     private String file_path;
 }

@@ -1,6 +1,6 @@
 package com.segroup.seproject_backend.controller;
 
-import com.segroup.seproject_backend.data_item.FeedbackItem;
+import com.segroup.seproject_backend.data_item.FeedbackWebItem;
 import com.segroup.seproject_backend.repository.ProjectRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,15 +16,15 @@ public class FeedbackController {
 
     @PostMapping("/use/feedback")
     @ResponseBody
-    public String handleFeedback(FeedbackItem feedbackItem) {
+    public String handleFeedback(FeedbackWebItem feedbackWebItem) {
         Date date = new Date();
 
-        if(feedbackItem.getFeedback().equals("right")) {
+        if(feedbackWebItem.getFeedback().equals("right")) {
             projectRepo.recordOneRightFeedback(date, 0); //之后需要修改-获取模型id
             System.out.println("用户进行了反馈，值为right");
             return "valid feedback";
         }
-        else if(feedbackItem.getFeedback().equals("wrong")) {
+        else if(feedbackWebItem.getFeedback().equals("wrong")) {
             projectRepo.recordOneWrongFeedback(date, 0); //之后需要修改-获取模型id
             System.out.println("用户进行了反馈，值为wrong");
             return "valid feedback";

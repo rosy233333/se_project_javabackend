@@ -1,8 +1,9 @@
 package com.segroup.seproject_backend.repository;
 
-import com.segroup.seproject_backend.data_item.UsageItem;
+import com.segroup.seproject_backend.data_item.UsageDBItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import org.springframework.stereotype.Repository;
@@ -11,41 +12,43 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
+//使用这个类来操作数据库。
+//使用方法：将功能的执行过程中，所有对数据库的操作封装成这个类的一个方法（例如RecordOneUse，在数据库中记录一次使用）。
+//然后在Controller类的功能代码中调用这个方法。
+//注意：新增方法时，需要在接口ProjectRepo中新增方法，再在这个类中实现接口中新增的方法。
+//提示：常使用JdbcTemplate的两个方法操作数据库，JdbcTemplate::update、JdbcTemplate::queryForObject和JdbcTemplate::queryForList。
+//这些方法的使用都可以参考这个类原有的代码。
 @Repository
 public class ProjectRepoImpl implements ProjectRepo{
 
     @Autowired
     private JdbcTemplate jdbc;
 
-    //为使用频次表添加记录项
-    private UsageItem insertUsageRecord(Date use_date, long model_id) {
-        jdbc.update("INSERT INTO usages(use_date, model_id) VALUES (?, ?)", dateConvert(use_date), model_id);
-        return new UsageItem(use_date, model_id, 0, 0, 0);
-    }
-
-    //用于将查询的行结果转化为数据类
-    private UsageItem usageItemMapper(ResultSet rs, int rowNum) throws SQLException {
-        return new UsageItem(
-                rs.getDate("use_date"),
-                rs.getLong("model_id"),
-                rs.getInt("use_count"),
-                rs.getInt("wrong_feedback_count"),
-                rs.getInt("right_feedback_count")
-        );
-    }
-
-    //将java.util.Date转换为java.sql.Date。当向sql语句传入Date变量时，必须先使用这个函数转换Date的类型。
+    //使用数据库的Date类型时，需要注意：
+    //Date有两种：java.util.Date和java.sql.Date。
+    //Java代码里经常使用的是java.util.Date，查询数据库得到的/向数据库中插入的是java.sql.Date。
+    //java.sql.Date继承自java.util.Date，因此可以直接把java.sql.Date赋值给java.util.Date。
+    //但反过来就不可以。所以需要使用下面这个函数，将java.util.Date转换为java.sql.Date。
+    //当向sql语句传入java.util.Date变量时，必须先使用这个函数转换Date的类型。
+    //另外说一句：希望对Date的转换能够全部局限到这个类的内部，这个类对外提供的方法全部使用java.util.Date，因此在这个类之外，无需考虑Date类型转换的问题。
     private java.sql.Date dateConvert(Date date){
         return new java.sql.Date(date.getTime());
     }
 
+    //为使用频次表添加记录项
+    private UsageDBItem insertUsageRecord(Date use_date, long model_id) {
+        jdbc.update("INSERT INTO usages(use_date, model_id) VALUES (?, ?)", dateConvert(use_date), model_id);
+        return new UsageDBItem(use_date, model_id, 0, 0, 0);
+    }
+
+    //记录一次使用
     @Override
     public void recordOneUse(Date use_date, long model_id) {
         //从数据库中取出数据项
-        UsageItem usage;
+        UsageDBItem usage;
         try {
             usage = jdbc.queryForObject("SELECT * FROM usages WHERE use_date = ? AND model_id = ?",
-                    this::usageItemMapper,
+                    new BeanPropertyRowMapper<>(UsageDBItem.class),
                     dateConvert(use_date),
                     model_id);
         }
@@ -68,13 +71,14 @@ public class ProjectRepoImpl implements ProjectRepo{
         }
     }
 
+    //记录一次“正确”反馈
     @Override
     public void recordOneRightFeedback(Date use_date, long model_id) {
         //从数据库中取出数据项
-        UsageItem usage;
+        UsageDBItem usage;
         try {
             usage = jdbc.queryForObject("SELECT * FROM usages WHERE use_date = ? AND model_id = ?",
-                    this::usageItemMapper,
+                    new BeanPropertyRowMapper<>(UsageDBItem.class),
                     dateConvert(use_date),
                     model_id);
         }
@@ -97,13 +101,14 @@ public class ProjectRepoImpl implements ProjectRepo{
         }
     }
 
+    //记录一次“错误”反馈
     @Override
     public void recordOneWrongFeedback(Date use_date, long model_id) {
         //从数据库中取出数据项
-        UsageItem usage;
+        UsageDBItem usage;
         try {
             usage = jdbc.queryForObject("SELECT * FROM usages WHERE use_date = ? AND model_id = ?",
-                    this::usageItemMapper,
+                    new BeanPropertyRowMapper<>(UsageDBItem.class),
                     dateConvert(use_date),
                     model_id);
         }
