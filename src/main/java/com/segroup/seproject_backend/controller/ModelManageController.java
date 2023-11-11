@@ -1,12 +1,12 @@
 package com.segroup.seproject_backend.controller;
 
-import com.segroup.seproject_backend.data_item.QueryModelWebItem;
-import com.segroup.seproject_backend.data_item.ResultWebItem;
-import com.segroup.seproject_backend.data_item.SwitchModelF2JWebItem;
-import com.segroup.seproject_backend.data_item.TrainModelF2JWebItem;
+import com.segroup.seproject_backend.data_item.*;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 //这个类用来处理模型管理相关的功能
 @Controller
