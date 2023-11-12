@@ -25,13 +25,15 @@ public class QueryController {
     //对应接口：应用模型页面-请求模型列表
     @PostMapping("/request/model")
     @CrossOrigin
-    public QueryModelWebItem handleModelQuery() {//目前问题表是空的，跑不动
-        QueryModelWebItem res = null;
+    public QueryModelWebItem handleModelQuery() {
+        QueryModelWebItem res = new QueryModelWebItem();
         List<ModelDBItem> models;
         ModelDBItem cmodel = null;
         try{
-            models = jdbc.queryForList("SELECT * FROM models",
-                    ModelDBItem.class);
+            models = jdbc.query("SELECT * FROM models",
+                    new BeanPropertyRowMapper<>(ModelDBItem.class));
+            cmodel = jdbc.queryForObject("SELECT * FROM models WHERE is_active = 1",
+                    new BeanPropertyRowMapper<>(ModelDBItem.class));
         }
         catch (EmptyResultDataAccessException e){
             models = null;
