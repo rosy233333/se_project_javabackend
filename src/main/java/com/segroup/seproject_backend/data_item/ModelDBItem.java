@@ -1,10 +1,14 @@
 package com.segroup.seproject_backend.data_item;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ModelDBItem {
     private long model_id;
     private long user_id;

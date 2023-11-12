@@ -1,4 +1,4 @@
-package com.segroup.seproject_backend;
+package com.segroup.seproject_backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,5 +1,7 @@
 package com.segroup.seproject_backend.repository;
 
+import com.segroup.seproject_backend.data_item.ImageDBItem;
+import com.segroup.seproject_backend.data_item.ModelDBItem;
 import com.segroup.seproject_backend.data_item.UsageDBItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 
 //使用这个类来操作数据库。
 //使用方法：将功能的执行过程中，所有对数据库的操作封装成这个类的一个方法（例如RecordOneUse，在数据库中记录一次使用）。
@@ -129,5 +132,32 @@ public class ProjectRepoImpl implements ProjectRepo{
         if(res != 1){
             throw new RuntimeException("我也不知道怎么了，本来不应该执行到这里的！09786844");
         }
+    }
+
+    // 根据数据集id查询该数据集的图片
+    public List<ImageDBItem> findImagesByDatasetId(long dataset_id) {
+        return jdbc.queryForList(
+            """
+                SELECT * FROM images WHERE image_id IN
+                    SELECT image_id FROM dataset_image WHERE dataset_id = ? ;
+            """,
+            ImageDBItem.class,
+            dataset_id
+        );
+    }
+
+    // 向模型表中插入模型
+    // 不会插入模型id，因为id由数据库自动分配。
+    // 不会插入启用日期，因为新建的模型还未启用。
+    public void insertModel(ModelDBItem model) {
+        jdbc.update("INSERT INTO models(user_id, model_name, model_path, dataset_id, train_accuracy, is_active, model_create_date) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            model.getUser_id(),
+            model.getModel_name(),
+            model.getModel_path(),
+            model.getDataset_id(),
+            model.getTrain_accuracy(),
+            model.getIs_active(),
+            dateConvert(model.getModel_create_date())
+        );
     }
 }
