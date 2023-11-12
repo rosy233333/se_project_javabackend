@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ResultWebItem {
-    private String result;
+public class SwitchModelJ2PWebItem {
+    private String new_model_path;
 }
