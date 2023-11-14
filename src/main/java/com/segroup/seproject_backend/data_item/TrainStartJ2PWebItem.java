@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrainStartJ2PWebItem {
-    private String dataset_path;
+    private String model_name;
+    private String txt_path;
     private double ratio;
     private int epoch;
     private int batch_size;

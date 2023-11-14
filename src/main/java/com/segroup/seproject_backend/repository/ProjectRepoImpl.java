@@ -136,12 +136,13 @@ public class ProjectRepoImpl implements ProjectRepo{
 
     // 根据数据集id查询该数据集的图片
     public List<ImageDBItem> findImagesByDatasetId(long dataset_id) {
-        return jdbc.queryForList(
+        return jdbc.query(
             """
-                SELECT * FROM images WHERE image_id IN
-                    SELECT image_id FROM dataset_image WHERE dataset_id = ? ;
+                SELECT * FROM images WHERE image_id IN (
+                    SELECT image_id FROM dataset_image WHERE dataset_id = ?
+                );
             """,
-            ImageDBItem.class,
+            new BeanPropertyRowMapper<>(ImageDBItem.class),
             dataset_id
         );
     }
