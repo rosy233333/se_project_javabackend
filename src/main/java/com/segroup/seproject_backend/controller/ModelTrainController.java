@@ -86,6 +86,7 @@ public class ModelTrainController {
         // 创建数据集文件
         Date date = new Date();
         String filePathName = dataset_file_path + "dataset" + date.getTime() + ".txt";
+        System.out.println(filePathName);
         File file = new File(filePathName);
         if (!(file.createNewFile())) {
             throw new IOException("ModelTrainController.onFStart: 无法创建文件，文件已存在！");
@@ -112,6 +113,9 @@ public class ModelTrainController {
         ObjectMapper mapper = new ObjectMapper();
         String toPStr = mapper.writeValueAsString(toPItem);
 
+        System.out.println("onFStart-toPStr:");
+        System.out.println(toPStr);
+
         // 发送信息给python后端
         j2pClient.userMap.put(user_id, this);
         if(!j2pClient.getReadyState().equals(ReadyState.OPEN)) {
@@ -120,8 +124,8 @@ public class ModelTrainController {
                 // System.out.println("连上了，但没完全连上");
             }
         }
-        System.out.println("onFStart-toPStr:");
-        System.out.println(toPStr);
+//        System.out.println("onFStart-toPStr:");
+//        System.out.println(toPStr);
         j2pClient.send(toPStr);
     }
 
