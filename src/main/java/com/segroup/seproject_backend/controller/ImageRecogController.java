@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
@@ -41,6 +42,7 @@ public class ImageRecogController {
 
     @PostMapping("/use/image")
     @ResponseBody
+    @CrossOrigin
     public ImageRecogJ2FWebItem handleFileUpload(ImageRecogF2JWebItem imageRecogF2JWebItem) throws IOException, InterruptedException {
         // 保存文件
         Date date = new Date();

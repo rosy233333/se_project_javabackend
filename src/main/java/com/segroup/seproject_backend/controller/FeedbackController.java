@@ -4,6 +4,7 @@ import com.segroup.seproject_backend.data_item.FeedbackWebItem;
 import com.segroup.seproject_backend.repository.ProjectRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -16,6 +17,7 @@ public class FeedbackController {
 
     @PostMapping("/use/feedback")
     @ResponseBody
+    @CrossOrigin
     public String handleFeedback(FeedbackWebItem feedbackWebItem) {
         Date date = new Date();
 

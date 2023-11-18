@@ -9,6 +9,7 @@ import com.segroup.seproject_backend.data_item.TrainStartF2JWebItem;
 import com.segroup.seproject_backend.data_item.WebSocketItem;
 import jakarta.websocket.Session;
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.enums.ReadyState;
 import org.java_websocket.handshake.ServerHandshake;
 import org.springframework.stereotype.Component;
 
@@ -67,5 +68,20 @@ public class TrainModelJ2PClient extends WebSocketClient {
     @Override
     public void onError(Exception e) {
         System.out.println(e.getMessage());
+    }
+
+    // 若没有连接/连接以断开，尝试连接
+    public void tryConnect() {
+        if(!getReadyState().equals(ReadyState.OPEN)) {
+            if(getReadyState().equals(ReadyState.NOT_YET_CONNECTED)) {
+                connect();
+            }
+            else {
+                reconnect();
+            }
+            while(!getReadyState().equals(ReadyState.OPEN)) {
+                // System.out.println("连上了，但没完全连上");
+            }
+        }
     }
 }

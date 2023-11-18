@@ -114,12 +114,8 @@ public class ModelTrainController {
 
         // 发送信息给python后端
         j2pClient.userMap.put(user_id, this);
-        if(!j2pClient.getReadyState().equals(ReadyState.OPEN)) {
-            j2pClient.connect(); // 这个连接是异步的，所以执行完这条代码后不一定连上了，需要等待
-            while(!j2pClient.getReadyState().equals(ReadyState.OPEN)) {
-                // System.out.println("连上了，但没完全连上");
-            }
-        }
+        j2pClient.tryConnect();
+
         System.out.println("onFStart-toPStr:");
         System.out.println(toPStr);
         j2pClient.send(toPStr);
@@ -137,13 +133,10 @@ public class ModelTrainController {
         WebSocketItem<Object> toPItem = new WebSocketItem<>(user_id, "stop", null);
         ObjectMapper mapper = new ObjectMapper();
         String toPStr = mapper.writeValueAsString(toPItem);
+
         j2pClient.userMap.put(user_id, this);
-        if(!j2pClient.getReadyState().equals(ReadyState.OPEN)) {
-            j2pClient.connect();// 这个连接是异步的，所以执行完这条代码后不一定连上了，需要等待
-            while(!j2pClient.getReadyState().equals(ReadyState.OPEN)) {
-                // System.out.println("连上了，但没完全连上");
-            }
-        }
+        j2pClient.tryConnect();
+
         System.out.println("onFStop-toPStr:");
         System.out.println(toPStr);
         j2pClient.send(toPStr);
