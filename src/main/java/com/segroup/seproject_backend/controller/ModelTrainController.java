@@ -86,6 +86,7 @@ public class ModelTrainController {
         // 创建数据集文件
         Date date = new Date();
         String filePathName = dataset_file_path + "dataset" + date.getTime() + ".txt";
+        System.out.println(filePathName);
         File file = new File(filePathName);
         if (!(file.createNewFile())) {
             throw new IOException("ModelTrainController.onFStart: 无法创建文件，文件已存在！");
@@ -111,6 +112,9 @@ public class ModelTrainController {
         WebSocketItem<TrainStartJ2PWebItem> toPItem = new WebSocketItem<>(user_id, "start", toPData);
         ObjectMapper mapper = new ObjectMapper();
         String toPStr = mapper.writeValueAsString(toPItem);
+
+        System.out.println("onFStart-toPStr:");
+        System.out.println(toPStr);
 
         // 发送信息给python后端
         j2pClient.userMap.put(user_id, this);

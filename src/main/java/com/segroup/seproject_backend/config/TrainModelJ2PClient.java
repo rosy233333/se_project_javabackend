@@ -21,7 +21,7 @@ import java.util.HashMap;
 public class TrainModelJ2PClient extends WebSocketClient {
     // 初始化时，连接python后端
     public TrainModelJ2PClient() {
-        super(URI.create("ws://localhost:8089/train"));
+        super(URI.create("ws://localhost:8090/train"));
     }
 
     // public ModelTrainController controller;
