@@ -2,6 +2,7 @@ package com.segroup.seproject_backend.repository;
 
 import com.segroup.seproject_backend.data_item.ImageDBItem;
 import com.segroup.seproject_backend.data_item.ModelDBItem;
+import com.segroup.seproject_backend.data_item.UsageDBItem;
 
 import java.util.Date;
 import java.util.List;
@@ -18,4 +19,7 @@ public interface ProjectRepo {
     public List<ImageDBItem> findImagesByDatasetId(long dataset_id);
     // 向模型表中插入模型
     public void insertModel(ModelDBItem model);
+
+    // 请求统计信息
+    public List<UsageDBItem> findUsagesByModelId(long model_id);
 }
