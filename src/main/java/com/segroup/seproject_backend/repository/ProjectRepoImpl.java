@@ -1,5 +1,8 @@
 package com.segroup.seproject_backend.repository;
 
+import com.segroup.seproject_backend.data_item.DatasetDBItem;
+import com.segroup.seproject_backend.data_item.DatasetImageDBItem;
+import com.segroup.seproject_backend.data_item.ImageDBItem;
 import com.segroup.seproject_backend.data_item.ImageDBItem;
 import com.segroup.seproject_backend.data_item.ModelDBItem;
 import com.segroup.seproject_backend.data_item.UsageDBItem;
@@ -10,6 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import org.springframework.stereotype.Repository;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
@@ -44,6 +48,22 @@ public class ProjectRepoImpl implements ProjectRepo{
         return new UsageDBItem(use_date, model_id, 0, 0, 0);
     }
 
+    private String deleteDataset(long dataset_id){
+        int rowsAffected = jdbc.update("DELETE FROM datasets WHERE dataset_id = ?", dataset_id);
+        if (rowsAffected > 0) {
+            // 删除成功
+            return "successful";
+        } else {
+            // 未找到匹配的记录，可能已经被删除或根本不存在
+            return "failed";
+        }
+    }
+
+    private boolean deleteImageFile(String imagePath) {
+        // 使用 File 类来删除图像文件
+        File file = new File(imagePath);
+        return file.delete();
+    }
     //记录一次使用
     @Override
     public void recordOneUse(Date use_date, long model_id) {
@@ -161,4 +181,141 @@ public class ProjectRepoImpl implements ProjectRepo{
             dateConvert(model.getModel_create_date())
         );
     }
+
+    @Override
+    public String deleteDataBaseItem(long dataset_id){
+        //根据dataset_id,查找dataset_image中需要删除的image_id,组成image_ids
+        List<DatasetImageDBItem> image_ids;
+        try{
+            image_ids = jdbc.query("SELECT * FROM dataset_image",
+                    new BeanPropertyRowMapper<>(DatasetImageDBItem.class));
+        }
+        catch (EmptyResultDataAccessException e){
+            image_ids = null;
+        }
+        //根据image_ids,在images中查找对应图片路径，在相应位置删除图片
+        if (image_ids != null) {
+            for (DatasetImageDBItem imageItem : image_ids) {
+
+                long imageId = imageItem.getImage_id();
+
+                ImageDBItem image = null;
+                try{
+                    image = jdbc.queryForObject("SELECT * FROM images WHERE image_id=?",
+                            new BeanPropertyRowMapper<>(ImageDBItem.class),
+                            imageId);
+                }catch (EmptyResultDataAccessException ex) {
+
+                    ex.printStackTrace();
+                }
+
+                //获取图片路径
+                String imagePath;
+                if (image != null) {
+                    imagePath = image.getImage_path();
+                    // 在这里继续处理 imagePath，例如删除文件等操作
+                } else {
+                    return "无法定位图片";
+                }
+
+                // Delete the image file
+                boolean deleted = deleteImageFile(imagePath);
+                if(!deleted){
+                    return "图片为成功删除";
+                }
+
+                int res1 = jdbc.update("DELETE FROM images WHERE image_id = ?", imageId);
+                if(res1<=0)
+                {
+                    return "failed";
+                }
+                int res2 = jdbc.update("DELETE FROM dataset_image WHERE image_id = ?", imageId);
+                if(res2<=0)
+                {
+                    return "failed";
+                }
+
+
+            }
+        }
+
+        //删除datasets表项
+        DatasetDBItem dataset = null;
+        try {
+            dataset = jdbc.queryForObject("SELECT * FROM datasets WHERE dataset_id = ?",
+                    new BeanPropertyRowMapper<>(DatasetDBItem.class),
+                    dataset_id);
+        }
+
+        catch(EmptyResultDataAccessException e) {
+            //如果未取到则新建
+//            usage = insertUsageRecord(use_date, model_id);
+            System.out.println("数据库中不存在相应数据集");
+        }
+        if (dataset != null) {
+            // 执行删除操作
+            return deleteDataset(dataset.getDataset_id());
+        }else{
+            return "failed";
+        }
+
+    }
+
+    @Override
+    public boolean uploadimagesDB(List<String> image_paths, List<String> labels, long dataset_id){
+        if (image_paths.size() != labels.size()) {
+            // 确保两个列表的长度相等，以避免数据不一致
+            return false;
+        }
+        for (int i = 0; i < image_paths.size(); i++) {
+            String image_path = image_paths.get(i);
+            String labelString = labels.get(i);
+            int label = Integer.parseInt(labelString);
+
+            ImageDBItem temp = null;
+            // 插入到数据库
+            int res1 = jdbc.update("INSERT INTO images(image_path, label) VALUES (?, ?)", image_path, label);
+            try{
+                temp = jdbc.queryForObject("SELECT * FROM images WHERE image_path=?",
+                        new BeanPropertyRowMapper<>(ImageDBItem.class),
+                        image_path);
+            }catch (EmptyResultDataAccessException ex) {
+
+                ex.printStackTrace();
+            }
+            long image_id = temp.getImage_id();
+
+            int res2 = jdbc.update("INSERT INTO dataset_image(image_id) VALUES (?)", image_id);
+            if(res1<=0||res2<=0){
+                return false;
+            }
+
+        }
+
+        // 所有插入操作成功
+        return true;
+
+    }
+
+    @Override
+    public long uploaddatasetsDB(long user_id, String dataset_name,int image_num){
+        Date dataset_create_date = new Date();
+        int res = jdbc.update("INSERT INTO datasets(user_id,dataset_name,image_num,dataset_create_date) VALUES (?,?,?,?)", user_id,dataset_name,image_num,dataset_create_date);
+        if(res<=0){
+            return -1;
+        }
+        DatasetDBItem temp = null;
+        try{
+            temp = jdbc.queryForObject("SELECT * FROM datasets WHERE dataset_name=?",
+                    new BeanPropertyRowMapper<>(DatasetDBItem.class),
+                    dataset_name);
+        }catch (EmptyResultDataAccessException ex) {
+
+            ex.printStackTrace();
+        }
+        long result = temp.getDataset_id();
+        return result;
+
+    }
+
 }
