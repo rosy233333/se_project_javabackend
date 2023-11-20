@@ -1,5 +1,6 @@
 package com.segroup.seproject_backend.repository;
 
+
 import com.segroup.seproject_backend.data_item.DatasetDBItem;
 import com.segroup.seproject_backend.data_item.DatasetImageDBItem;
 import com.segroup.seproject_backend.data_item.ImageDBItem;
@@ -16,8 +17,12 @@ import org.springframework.stereotype.Repository;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Date;
+
 import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 //使用这个类来操作数据库。
 //使用方法：将功能的执行过程中，所有对数据库的操作封装成这个类的一个方法（例如RecordOneUse，在数据库中记录一次使用）。
@@ -231,6 +236,7 @@ public class ProjectRepoImpl implements ProjectRepo{
                 String imagePath;
                 if (image != null) {
                     imagePath = image.getImage_path();
+
                     // 在这里继续处理 imagePath，例如删除文件等操作
                 } else {
                     return "无法定位图片";
@@ -303,7 +309,7 @@ public class ProjectRepoImpl implements ProjectRepo{
             }
             long image_id = temp.getImage_id();
 
-            int res2 = jdbc.update("INSERT INTO dataset_image(image_id) VALUES (?)", image_id);
+            int res2 = jdbc.update("INSERT INTO dataset_image(image_id,dataset_id) VALUES (?,?)", image_id,dataset_id);
             if(res1<=0||res2<=0){
                 return false;
             }
@@ -317,8 +323,11 @@ public class ProjectRepoImpl implements ProjectRepo{
 
     @Override
     public long uploaddatasetsDB(long user_id, String dataset_name,int image_num){
-        Date dataset_create_date = new Date();
-        int res = jdbc.update("INSERT INTO datasets(user_id,dataset_name,image_num,dataset_create_date) VALUES (?,?,?,?)", user_id,dataset_name,image_num,dataset_create_date);
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Date utilDate = java.util.Date.from(localDateTime.atZone(java.time.ZoneId.systemDefault()).toInstant());
+        System.out.println(utilDate);
+
+        int res = jdbc.update("INSERT INTO datasets(user_id,dataset_name,image_num,dataset_create_date) VALUES (?,?,?,?)", user_id,dataset_name,image_num,dateConvert(utilDate));
         if(res<=0){
             return -1;
         }

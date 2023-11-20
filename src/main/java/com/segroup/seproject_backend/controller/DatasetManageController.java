@@ -5,6 +5,7 @@ import java.lang.String;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -21,6 +22,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -90,31 +93,42 @@ public class DatasetManageController {
             }
         }
 
-        // 将数据传给 Python 后端
+// 将数据传给 Python 后端
         String pythonBackendUrl = "http://localhost:8088/form_dataset";
         ImagePathJ2PWebItem formData = new ImagePathJ2PWebItem(uploaddatasetf2jwebitem.getDataset_name(), imagePaths);
 
+// 构造 MultiValueMap
+        MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
+        form.add("dataset_name", formData.getDataset_name());  // 添加 dataset_name
+
+// 将 image_paths 作为单独的键值对添加到 form 中，而不是使用 addAll
+        for (String imagePath : formData.getImage_paths()) {
+            form.add("image_paths", imagePath);
+        }
+
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<ImagePathJ2PWebItem> request = new HttpEntity<>(formData, headers);
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(form, headers);
 
         ResponseEntity<String> response = restTemplate.postForEntity(pythonBackendUrl, request, String.class);
 
         // 处理 Python 后端的响应
         String responseBody = response.getBody();
 
-        // 将 JSON 字符串转换为 List<String>
+// 将 JSON 字符串转换为 Map<String, Object>
         ObjectMapper objectMapper = new ObjectMapper();
 
-        List<String> processedImagePaths = null;
+        Map<String, Object> jsonMap = null;
         try {
-            processedImagePaths = objectMapper.readValue(responseBody, new TypeReference<List<String>>() {
-            });
-        }catch (JsonProcessingException e) {
+            jsonMap = objectMapper.readValue(responseBody, new TypeReference<Map<String, Object>>() {});
+        } catch (JsonProcessingException e) {
             // 处理 JSON 解析异常
-            e.printStackTrace(); // 打印异常堆栈信息到控制台，可以根据需要替换为日志记录等其他处理
+            e.printStackTrace();
             // 在这里你可以根据实际需求进行其他处理，例如返回默认值或向用户显示错误信息
         }
+
+// 从 Map 中获取 "image_paths" 对应的值，然后将其转换为 List<String>
+        List<String> processedImagePaths = (List<String>) jsonMap.get("image_paths");
 
         // 替换之前数据集中各图片保存到本地的路径数组的内容
         for (int i = 0; i < imagePaths.size(); i++) {
@@ -129,24 +143,22 @@ public class DatasetManageController {
         }
 
 
-
-
-
         //存datasets
-
         List<String>labels = uploaddatasetf2jwebitem.getLabels();
         long user_id = Long.parseLong(uploaddatasetf2jwebitem.getUser_id());
+
         String dataset_name = uploaddatasetf2jwebitem.getDataset_name();
         List<MultipartFile> fileLists = uploaddatasetf2jwebitem.getImages();
         int image_num = fileLists.size();//获取数据量大小
 
-
         long dateset_id = projectRepo.uploaddatasetsDB(user_id,dataset_name,image_num);
         if(dateset_id == -1)
         {
-            result.setResult("successful");
+            result.setResult("failed");
             return result;
         }
+
+        System.out.println(dateset_id );
         //
         boolean res = projectRepo.uploadimagesDB(imagePaths,labels,dateset_id);
 
@@ -155,6 +167,7 @@ public class DatasetManageController {
         }else {
             result.setResult("failed");
         }
+
         return result;
     }
 
