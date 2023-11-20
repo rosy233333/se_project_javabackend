@@ -42,10 +42,6 @@ public class ModelManageController {
     public ResultWebItem handleSwitchModel(SwitchModelF2JWebItem body) {
         // 需要你们来实现
         System.out.println(body);
-        jdbc.update("UPDATE models SET is_active = 0 WHERE is_active = 1");
-        jdbc.update("UPDATE models SET is_active = 1, model_activate_date = ? WHERE model_id = ?",
-                new Date(System.currentTimeMillis()),
-                body.getModel_id());
 
         String path = jdbc.queryForObject("SELECT model_path FROM models WHERE model_id = ?",
                 String.class,
@@ -54,10 +50,19 @@ public class ModelManageController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
-        form.add("mew_model_map", item.getNew_model_path());
+        form.add("new_model_path", item.getNew_model_path());
         HttpEntity<MultiValueMap<String, Object>> datas = new HttpEntity<>(form, headers);
         String url = environment.getProperty("my-config.global.python-backend-url") + "/switch_model";
         ResultWebItem recogResult = restTemplate.postForObject(url, datas, ResultWebItem.class);
+
+        if(recogResult.getResult().equals("successful")) {
+            jdbc.update("UPDATE models SET is_active = 0 WHERE is_active = 1");
+            jdbc.update("UPDATE models SET is_active = 1, model_activate_date = ? WHERE model_id = ?",
+                    new Date(System.currentTimeMillis()),
+                    body.getModel_id()
+            );
+        }
+
         return recogResult;
     }
 

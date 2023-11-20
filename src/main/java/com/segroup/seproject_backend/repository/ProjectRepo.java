@@ -22,4 +22,7 @@ public interface ProjectRepo {
 
     // 请求统计信息
     public List<UsageDBItem> findUsagesByModelId(long model_id);
+
+    // 获取当前模型
+    public ModelDBItem getCurrentModel();
 }

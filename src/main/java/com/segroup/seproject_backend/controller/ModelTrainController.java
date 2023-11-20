@@ -85,8 +85,8 @@ public class ModelTrainController {
         String filePathName;
 
         if(dataset_id == 0) {
-            // minst数据集
-            filePathName = "minst";
+            // mnist数据集
+            filePathName = "mnist";
         }
         else {
             // 创建数据集文件

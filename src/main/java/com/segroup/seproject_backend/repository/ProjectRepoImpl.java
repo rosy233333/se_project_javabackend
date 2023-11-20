@@ -173,4 +173,10 @@ public class ProjectRepoImpl implements ProjectRepo{
                 model_id
         );
     }
+
+    // 获取当前模型
+    @Override
+    public ModelDBItem getCurrentModel() {
+        return jdbc.queryForObject("SELECT * FROM models WHERE is_active = 1", new BeanPropertyRowMapper<>(ModelDBItem.class));
+    }
 }
