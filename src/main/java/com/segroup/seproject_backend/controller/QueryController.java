@@ -1,9 +1,7 @@
 package com.segroup.seproject_backend.controller;
 
-import com.segroup.seproject_backend.data_item.DatasetDBItem;
-import com.segroup.seproject_backend.data_item.ModelDBItem;
-import com.segroup.seproject_backend.data_item.QueryDatasetWebItem;
-import com.segroup.seproject_backend.data_item.QueryModelWebItem;
+import com.segroup.seproject_backend.data_item.*;
+import com.segroup.seproject_backend.repository.ProjectRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -20,6 +18,10 @@ import java.util.List;
 public class QueryController {
     @Autowired
     private JdbcTemplate jdbc;
+
+    @Autowired
+    private ProjectRepo repo;
+
     //对应接口：应用模型页面-请求模型列表
     @PostMapping("/request/model")
     @ResponseBody
@@ -62,6 +64,14 @@ public class QueryController {
         res.setDatasets(datasets);
 //        System.out.println(res.getDatasets().get(0));
         return res;
+    }
 
+    @PostMapping("/request/usage")
+    @ResponseBody
+    @CrossOrigin
+    public QueryUsageJ2FWebItem handleUsageQuery(QueryUsageF2JWebItem body) {
+        return new QueryUsageJ2FWebItem(
+            repo.findUsagesByModelId(Long.parseLong(body.getModel_id()))
+        );
     }
 }

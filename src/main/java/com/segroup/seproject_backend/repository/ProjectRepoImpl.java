@@ -155,6 +155,7 @@ public class ProjectRepoImpl implements ProjectRepo{
     }
 
     // 根据数据集id查询该数据集的图片
+    @Override
     public List<ImageDBItem> findImagesByDatasetId(long dataset_id) {
         return jdbc.query(
             """
@@ -170,6 +171,7 @@ public class ProjectRepoImpl implements ProjectRepo{
     // 向模型表中插入模型
     // 不会插入模型id，因为id由数据库自动分配。
     // 不会插入启用日期，因为新建的模型还未启用。
+    @Override
     public void insertModel(ModelDBItem model) {
         jdbc.update("INSERT INTO models(user_id, model_name, model_path, dataset_id, train_accuracy, is_active, model_create_date) VALUES (?, ?, ?, ?, ?, ?, ?)",
             model.getUser_id(),
@@ -180,6 +182,22 @@ public class ProjectRepoImpl implements ProjectRepo{
             model.getIs_active(),
             dateConvert(model.getModel_create_date())
         );
+    }
+
+    // 根据数据集id查询该数据集的图片
+    @Override
+    public List<UsageDBItem> findUsagesByModelId(long model_id) {
+        return jdbc.query(
+                "SELECT * FROM usages WHERE model_id = ?;",
+                new BeanPropertyRowMapper<>(UsageDBItem.class),
+                model_id
+        );
+    }
+
+    // 获取当前模型
+    @Override
+    public ModelDBItem getCurrentModel() {
+        return jdbc.queryForObject("SELECT * FROM models WHERE is_active = 1", new BeanPropertyRowMapper<>(ModelDBItem.class));
     }
 
     @Override

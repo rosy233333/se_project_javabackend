@@ -82,22 +82,31 @@ public class ModelTrainController {
         // 获取数据集内容
         long dataset_id = body.getDataset_id();
         List<ImageDBItem> image_list = repo.findImagesByDatasetId(dataset_id);
+        String filePathName;
 
-        // 创建数据集文件
-        Date date = new Date();
-        String filePathName = dataset_file_path + "dataset" + date.getTime() + ".txt";
-        System.out.println(filePathName);
-        File file = new File(filePathName);
-        if (!(file.createNewFile())) {
-            throw new IOException("ModelTrainController.onFStart: 无法创建文件，文件已存在！");
+        if(dataset_id == 0) {
+            // mnist数据集
+            filePathName = "mnist";
         }
-        FileWriter fileWriter = new FileWriter(file);
-        for (ImageDBItem image: image_list) {
-            String write_str = String.format("%s, %d\n", image.getImage_path(), image.getLabel());
-            fileWriter.append(write_str);
+        else {
+            // 创建数据集文件
+            Date date = new Date();
+            filePathName = dataset_file_path + "dataset" + date.getTime() + ".txt";
+            System.out.println(filePathName);
+            File file = new File(filePathName);
+            if (!(file.createNewFile())) {
+                throw new IOException("ModelTrainController.onFStart: 无法创建文件，文件已存在！");
+            }
+            FileWriter fileWriter = new FileWriter(file);
+            for (ImageDBItem image: image_list) {
+                String write_str = String.format("%s, %d\n", image.getImage_path(), image.getLabel());
+                fileWriter.append(write_str);
+            }
+            fileWriter.close();
+            System.out.println("创建数据集文件成功。");
+
         }
-        fileWriter.close();
-        System.out.println("创建数据集文件成功。");
+
         System.out.println(filePathName);
 
         // 准备传递给python后端的数据类，并将其序列化
