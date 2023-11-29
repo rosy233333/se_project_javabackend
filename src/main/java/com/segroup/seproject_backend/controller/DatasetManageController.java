@@ -50,6 +50,7 @@ public class DatasetManageController {
         datasetId = Long.parseLong(datasetIdString);
             // 进一步处理 numericValue
 //        ResultWebItem result = null;
+        System.out.println("待删除的数据集id：" + datasetId);
         String res = projectRepo.deleteDataBaseItem(datasetId);
         System.out.println("返回结果："+res);
         ResultWebItem result = new ResultWebItem(res);

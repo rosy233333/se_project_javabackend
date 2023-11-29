@@ -210,8 +210,10 @@ public class ProjectRepoImpl implements ProjectRepo{
         //根据dataset_id,查找dataset_image中需要删除的image_id,组成image_ids
         List<DatasetImageDBItem> image_ids;
         try{
-            image_ids = jdbc.query("SELECT * FROM dataset_image",
-                    new BeanPropertyRowMapper<>(DatasetImageDBItem.class));
+            image_ids = jdbc.query("SELECT * FROM dataset_image WHERE dataset_id = ?",
+                    new BeanPropertyRowMapper<>(DatasetImageDBItem.class),
+                    dataset_id
+            );
         }
         catch (EmptyResultDataAccessException e){
             image_ids = null;

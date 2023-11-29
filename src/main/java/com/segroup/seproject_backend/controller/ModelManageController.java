@@ -54,15 +54,16 @@ public class ModelManageController {
         HttpEntity<MultiValueMap<String, Object>> datas = new HttpEntity<>(form, headers);
         String url = environment.getProperty("my-config.global.python-backend-url") + "/switch_model";
         ResultWebItem recogResult = restTemplate.postForObject(url, datas, ResultWebItem.class);
-
+//        System.out.println(recogResult.getResult());
+//        System.out.println(recogResult.getResult().equals("successful"));
         if(recogResult.getResult().equals("successful")) {
+//            System.out.println("执行到了这里");
             jdbc.update("UPDATE models SET is_active = 0 WHERE is_active = 1");
             jdbc.update("UPDATE models SET is_active = 1, model_activate_date = ? WHERE model_id = ?",
                     new Date(System.currentTimeMillis()),
                     body.getModel_id()
             );
         }
-
         return recogResult;
     }
 

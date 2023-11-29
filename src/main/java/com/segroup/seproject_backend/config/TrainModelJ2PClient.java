@@ -22,6 +22,7 @@ public class TrainModelJ2PClient extends WebSocketClient {
     // 初始化时，连接python后端
     public TrainModelJ2PClient() {
         super(URI.create("ws://localhost:8089/train"));
+        this.setConnectionLostTimeout(0);
     }
 
     // public ModelTrainController controller;
